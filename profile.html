@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile Settings – EcoTrack AI</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%2300d4aa%22/><path d=%22M30 70 L50 30 L70 70 M40 50 L60 50%22 stroke=%22white%22 stroke-width=%228%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="stylesheet" href="css/profile.css" />
+    
+    <meta name="theme-color" content="#22c55e">
+</head>
+<body class="app-body">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-text">EcoTrack <b>AI</b></span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item" id="nav-dashboard">
+                <span class="nav-label">Dashboard</span>
+            </a>
+            <a href="report.html" class="nav-item" id="nav-report">
+                <span class="nav-label">Reports</span>
+            </a>
+            <a href="calculator.html" class="nav-item" id="nav-calculator">
+                <span class="nav-label">Calculator</span>
+            </a>
+            <a href="history.html" class="nav-item" id="nav-history">
+                <span class="nav-label">History</span>
+            </a>
+            <a href="recommendations.html" class="nav-item" id="nav-recommendations">
+                <span class="nav-label">AI Insights</span>
+            </a>
+            <a href="leaderboard.html" class="nav-item" id="nav-leaderboard">
+                <span class="nav-label">Leaderboard</span>
+            </a>
+            <a href="offset.html" class="nav-item" id="nav-offset">
+                <span class="nav-label" data-i18n="offsetTools">Offset Tools</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-mini-profile" id="userMiniProfile">
+                <div class="user-avatar" id="sidebarAvatar">A</div>
+                <div class="user-info">
+                    <div class="user-name" id="sidebarName">Loading...</div>
+                    <div class="user-score-badge" id="sidebarScore">EcoScore: --</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">Menu</button>
+                <h1 class="page-title">Profile Settings</h1>
+            </div>
+            <div class="topbar-right">
+                <div class="profile-dropdown-container" style="position:relative; margin-left: 8px;">
+                    <div class="user-avatar" id="topNavAvatar" style="cursor:pointer; border: 2px solid var(--primary);" onclick="document.getElementById('profileDropdown').classList.toggle('active')">A</div>
+                    <div class="dropdown-menu" id="profileDropdown" style="position:absolute; top: 100%; right: 0; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 0.5rem; margin-top: 0.5rem; display: none; min-width: 150px; box-shadow: var(--shadow-card); z-index: 1000;">
+                        <a href="profile.html" style="display:block; padding: 0.5rem 1rem; color: #fff; text-decoration: none; font-size: 0.85rem; border-radius: 8px; background:rgba(255,255,255,0.05);">Profile Settings</a>
+                        <button onclick="logout()" style="width: 100%; text-align: left; background: transparent; border: none; padding: 0.5rem 1rem; color: var(--danger); cursor: pointer; font-size: 0.85rem; border-radius: 8px;" onmouseover="this.style.background='rgba(239, 68, 68, 0.1)'" onmouseout="this.style.background='transparent'">Logout</button>
+                    </div>
+                </div>
+                <style>
+                    .dropdown-menu.active { display: block !important; animation: fadeInDown 0.2s ease-out; }
+                </style>
+            </div>
+        </header>
+
+        <div class="profile-wrapper">
+            <div class="profile-container">
+                <div class="profile-content">
+                    <div class="profile-header">
+                        <div class="avatar-upload-wrapper">
+                            <label for="profilePicInput" class="avatar-upload-container" id="avatarPreviewContainer">
+                                <span class="avatar-placeholder" id="avatarPlaceholderInitial"></span>
+                                <img id="avatarPreviewImage" src="" alt="Profile Picture" />
+                                <div class="upload-overlay">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                    <span>Upload Image</span>
+                                </div>
+                            </label>
+                            <input type="file" id="profilePicInput" accept="image/*" />
+                        </div>
+                        <div class="profile-info-header">
+                            <h2 id="profileDisplayName">Loading...</h2>
+                            <p id="profileEmailDisplay">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                                fetching data...
+                            </p>
+                            <div class="modern-badge">
+                                <span id="profileEcoScoreDisplay">EcoScore: 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="profileForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" name="firstName" required placeholder="Jane" />
+                                <svg class="input-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" id="lastName" name="lastName" placeholder="Doe" />
+                                <svg class="input-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" disabled title="Email cannot be changed" />
+                                <svg class="input-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" placeholder="+1 (555) 000-0000" />
+                                <svg class="input-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-save" id="saveProfileBtn">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            Save Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/profile.js"></script>
+    <script>
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('profileDropdown');
+            const avatar = document.getElementById('topNavAvatar');
+            if (dropdown && avatar && !avatar.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

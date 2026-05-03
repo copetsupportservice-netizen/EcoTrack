@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campus Leaderboard – EcoTrack AI</title>
+    <script src="js/i18n.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+</head>
+
+<body class="app-body">
+    <!-- Mobile sidebar backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo"><span class="logo-text">EcoTrack <b>AI</b></span></div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item"><span
+                    class="nav-label" data-i18n="nav_dashboard">Dashboard</span></a>
+            <a href="report.html" class="nav-item" id="nav-report">
+                <span class="nav-label" data-i18n="nav_report">Report Dashboard</span>
+            </a>
+
+            <a href="calculator.html" class="nav-item"><span
+                    class="nav-label" data-i18n="nav_calculator">Calculator</span></a>
+            <a href="history.html" class="nav-item"><span
+                    class="nav-label" data-i18n="nav_history">History</span></a>
+            <a href="recommendations.html" class="nav-item"><span class="nav-label">AI
+                    Insights</span></a>
+            <a href="leaderboard.html" class="nav-item active"><span
+                    class="nav-label" data-i18n="nav_leaderboard">Leaderboard</span></a>
+            <a href="offset.html" class="nav-item"><span class="nav-label" data-i18n="nav_offset">Offset Tools</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-mini-profile">
+                <div class="user-avatar" id="sidebarAvatar">A</div>
+                <div class="user-info">
+                    <div class="user-name" id="sidebarName">Loading...</div>
+                    <div class="user-score-badge" id="sidebarScore">EcoScore: --</div>
+                </div>
+            </div>
+                        <div class="lang-toggle" style="margin-bottom: 1rem; padding: 0 1rem; display: flex; gap: 0.5rem;">
+                <button onclick="switchLanguage('en')" data-lang="en" class="lang-btn"
+                    style="font-size: 0.7rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.3rem 0.6rem; border-radius: 8px; cursor: pointer; transition:0.2s;">EN</button>
+                <button onclick="switchLanguage('hi')" data-lang="hi" class="lang-btn"
+                    style="font-size: 0.7rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.3rem 0.6rem; border-radius: 8px; cursor: pointer; transition:0.2s;">HI</button>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle Navigation">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <h1 class="page-title" data-i18n="lb_title">Campus Leaderboard</h1>
+            </div>
+            <div class="topbar-right">
+                <select class="period-select" id="leaderboardPeriod" onchange="loadLeaderboard()">
+                    <option value="week" data-i18n="this_week">This Week</option>
+                    <option value="month" selected data-i18n="this_month">This Month</option>
+                    <option value="alltime" data-i18n="all_time">All Time</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="leaderboard-wrapper">
+
+            <!-- User's Current Position Banner -->
+            <div class="card my-rank-banner">
+                <div class="my-rank-content">
+                    <div class="my-rank-left">
+                        <div class="my-rank-num" id="myRankDisplay">#--</div>
+                        <div>
+                            <h3 id="myRankName">You</h3>
+                            <p data-i18n="your_position">Your current leaderboard position</p>
+                        </div>
+                    </div>
+                    <div class="my-rank-score">
+                        <div class="rank-ecoscore" id="myRankScore">--</div>
+                        <div>EcoScore</div>
+                    </div>
+                    <div class="my-rank-right">
+                        <div class="rank-till-next" id="rankTillNext"></div>
+                        <button class="btn-primary" onclick="generateShareCard()"
+                            style="margin-top: 10px; padding: 0.5rem 1rem; font-size: 0.8rem;" data-i18n="share_impact" data-i18n="share_impact">Share My Impact</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top 3 Podium -->
+            <div class="podium-section">
+                <div class="podium-card podium-2" id="podium2">
+                    <div class="podium-avatar"></div>
+                    <div class="podium-name" id="p2name">--</div>
+                    <div class="podium-score" id="p2score">--</div>
+                    <div class="podium-block p-block-2">2nd</div>
+                </div>
+                <div class="podium-card podium-1" id="podium1">
+                    <div class="podium-crown"></div>
+                    <div class="podium-avatar"></div>
+                    <div class="podium-name" id="p1name">--</div>
+                    <div class="podium-score" id="p1score">--</div>
+                    <div class="podium-block p-block-1">1st</div>
+                </div>
+                <div class="podium-card podium-3" id="podium3">
+                    <div class="podium-avatar"></div>
+                    <div class="podium-name" id="p3name">--</div>
+                    <div class="podium-score" id="p3score">--</div>
+                    <div class="podium-block p-block-3">3rd</div>
+                </div>
+            </div>
+
+            <!-- Full Rankings Table -->
+            <div class="card leaderboard-table-card">
+                <div class="card-header">
+                    <h3 data-i18n="full_rankings">Full Rankings</h3>
+                    <div class="lb-tabs">
+                        <button class="lb-tab active" onclick="switchLbTab('individual', this)" data-i18n="individual">Individual</button>
+                        <button class="lb-tab" onclick="switchLbTab('groups', this)" data-i18n="campus_groups">Campus Groups</button>
+                        <button class="lb-tab" onclick="switchLbTab('ngo', this)" data-i18n="ngo_csr">NGO/CSR</button>
+                    </div>
+                </div>
+
+                <!-- Individual Tab -->
+                <div id="tab-individual">
+                    <div class="leaderboard-list" id="leaderboardList">
+                        <div class="lb-loading" data-i18n="loading_rankings">Loading rankings...</div>
+                    </div>
+                </div>
+
+                <!-- Groups Tab -->
+                <div id="tab-groups" style="display:none">
+                    <div class="leaderboard-list" id="groupLeaderboardList">
+                        <div class="lb-loading" data-i18n="loading_groups">Loading group rankings...</div>
+                    </div>
+                </div>
+
+                <!-- NGO Tab -->
+                <div id="tab-ngo" style="display:none">
+                    <div class="ngo-grid" id="ngoGrid"></div>
+                </div>
+            </div>
+
+            <!-- Badges Section -->
+            <div class="card badges-card full-width">
+                <div class="card-header">
+                    <h3 data-i18n="my_badges">My Eco Badges</h3>
+                </div>
+                <div class="badges-grid" id="badgesGrid"></div>
+            </div>
+
+        </div>
+    </main>
+
+
+    <script src="js/app.js"></script>
+    <script src="js/leaderboard.js"></script>
+</body>
+
+</html>

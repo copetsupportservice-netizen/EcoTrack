@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard – EcoTrack AI</title>
+    <meta name="description"
+        content="Your personal carbon footprint dashboard. Track emissions, view EcoScore, and get AI-powered recommendations." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700;900&display=swap"
+        rel="stylesheet" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%2300d4aa%22/><path d=%22M30 70 L50 30 L70 70 M40 50 L60 50%22 stroke=%22white%22 stroke-width=%228%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <meta name="theme-color" content="#22c55e">
+    <!-- Leaflet Map Library -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>
+        .scroll-fab {
+            right: 5.5rem !important; /* Move left to avoid overlapping chatbot */
+        }
+    </style>
+</head>
+
+<body class="app-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-text">EcoTrack <b>AI</b></span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item active" id="nav-dashboard">
+                <span class="nav-label" data-i18n="nav_dashboard">Dashboard</span>
+            </a>
+            <a href="report.html" class="nav-item" id="nav-report">
+                <span class="nav-label" data-i18n="nav_report">Reports</span>
+            </a>
+            <a href="calculator.html" class="nav-item" id="nav-calculator">
+                <span class="nav-label" data-i18n="nav_calculator">Calculator</span>
+            </a>
+            <a href="history.html" class="nav-item" id="nav-history">
+                <span class="nav-label" data-i18n="nav_history">History</span>
+            </a>
+            <a href="recommendations.html" class="nav-item" id="nav-recommendations">
+                <span class="nav-label" data-i18n="nav_insights">AI Insights</span>
+            </a>
+            <a href="leaderboard.html" class="nav-item" id="nav-leaderboard">
+                <span class="nav-label" data-i18n="nav_leaderboard">Leaderboard</span>
+            </a>
+            <a href="offset.html" class="nav-item" id="nav-offset">
+                <span class="nav-label" data-i18n="nav_offset">Offset Tools</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-mini-profile" id="userMiniProfile">
+                <div class="user-avatar" id="sidebarAvatar">A</div>
+                <div class="user-info">
+                    <div class="user-name" id="sidebarName">Loading...</div>
+                    <div class="user-score-badge" id="sidebarScore"><span data-i18n="ecoscore_col">EcoScore</span>: --</div>
+                </div>
+            </div>
+            <div class="lang-toggle" style="margin-bottom: 1rem; padding: 0 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                <button onclick="switchLanguage('en')" data-lang="en" class="lang-btn"
+                    style="font-size: 0.7rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.3rem 0.6rem; border-radius: 8px; cursor: pointer; transition:0.2s;">EN</button>
+                <button onclick="switchLanguage('hi')" data-lang="hi" class="lang-btn"
+                    style="font-size: 0.7rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.3rem 0.6rem; border-radius: 8px; cursor: pointer; transition:0.2s;">HI</button>
+                <button onclick="switchLanguage('bn')" data-lang="bn" class="lang-btn"
+                    style="font-size: 0.7rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.3rem 0.6rem; border-radius: 8px; cursor: pointer; transition:0.2s;">BN</button>
+                <button onclick="switchLanguage('ta')" data-lang="ta" class="lang-btn"
+                    style="font-size: 0.7rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.3rem 0.6rem; border-radius: 8px; cursor: pointer; transition:0.2s;">TA</button>
+            </div>
+            <button class="logout-btn" onclick="logout()" data-i18n="logout">Logout</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle Navigation">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <h1 class="page-title"  data-i18n="db_title">Dashboard</h1>
+                <div class="live-indicator" style="margin-left: 1.5rem;">
+                    <span class="live-dot"></span> <span class="status-badge" style="display:inline">REAL-TIME</span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="current-date" id="currentDate"></div>
+                <button class="btn-icon" id="enableNotificationsBtn" title="Set Daily Reminder"
+                    onclick="openReminderSettings()"
+                    style="display:inline-flex; background:rgba(255,255,255,0.05); border-radius:12px; border:1px solid rgba(255,255,255,0.1); padding:0.6rem; color:#fff; cursor:pointer; font-size:1.1rem; align-items:center; justify-content:center; transition:0.3s"
+                    onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
+                    onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='#fff'"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></button>
+                
+                <!-- Profile Dropdown -->
+                <div class="profile-dropdown-container" style="position:relative; margin-left: 8px;">
+                    <div class="user-avatar" id="topNavAvatar" style="cursor:pointer; border: 2px solid var(--primary);" onclick="document.getElementById('profileDropdown').classList.toggle('active')">A</div>
+                    <div class="dropdown-menu" id="profileDropdown" style="position:absolute; top: 100%; right: 0; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 0.5rem; margin-top: 0.5rem; display: none; min-width: 150px; box-shadow: var(--shadow-card); z-index: 1000;">
+                        <a href="profile.html" style="display:block; padding: 0.5rem 1rem; color: #fff; text-decoration: none; font-size: 0.85rem; border-radius: 8px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">Profile Settings</a>
+                        <button onclick="logout()" style="width: 100%; text-align: left; background: transparent; border: none; padding: 0.5rem 1rem; color: var(--danger); cursor: pointer; font-size: 0.85rem; border-radius: 8px;" onmouseover="this.style.background='rgba(239, 68, 68, 0.1)'" onmouseout="this.style.background='transparent'">Logout</button>
+                    </div>
+                </div>
+
+                <style>
+                    .dropdown-menu.active { display: block !important; animation: fadeInDown 0.2s ease-out; }
+                </style>
+
+                <button class="btn-add-data" onclick="window.location.href='calculator.html'" style="margin-left: 1rem;">
+                    <span>+</span> Log Data
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-grid">
+
+
+            <!-- EcoScore Card (Dominant Hero) -->
+            <div class="card ecoscore-card reveal">
+                <div class="card-header">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <h3 data-i18n="acc_overview" style="font-size: 1.5rem; letter-spacing: -0.02em;">Account Overview</h3>
+                        <div class="score-level-badge" style="background: rgba(0, 212, 170, 0.1); color: var(--primary); margin-bottom: 0;">
+                            <span id="levelBadgeIcon"></span> <span id="levelBadgeText">Neophyte</span>
+                            <span style="margin-left: 6px; cursor: help; display: inline-flex; align-items: center;" title="Your level increases as you log more sustainable activities and reduce your footprint.">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="ecoscore-display">
+                    <div class="score-ring-container" style="width: 200px; height: 200px;">
+                        <svg class="score-ring" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.04)"
+                                stroke-width="8" />
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="url(#scoreGrad)" stroke-width="10"
+                                stroke-dasharray="339" stroke-dashoffset="339" stroke-linecap="round"
+                                transform="rotate(-90 60 60)" id="scoreCircle" class="score-arc" />
+                            <defs>
+                                <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color: #EF4444" />
+                                    <stop offset="50%" style="stop-color: #FBBF24" />
+                                    <stop offset="100%" style="stop-color: #00D4AA" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="score-inner">
+                            <div class="score-number" id="ecoScoreDisplay" style="font-size: 3rem;">--</div>
+                            <div class="score-label" data-i18n="points">ECO POINTS</div>
+                        </div>
+                    </div>
+                    <div class="score-info" style="flex: 1;">
+                        <div class="score-tier-badge" id="scoreTierBadge" style="font-size: 1rem; padding: 0.4rem 1.25rem;">Analyzing Performance...</div>
+                        <p class="score-desc" id="scoreDesc" style="font-size: 0.95rem; opacity: 0.8;">Complete your first activity to see your environmental impact score.</p>
+
+                        <!-- Level System Progress -->
+                        <div class="level-progress-container">
+                            <div class="level-info-header">
+                                <span class="level-name"><span data-i18n="next_rank">Next Rank:</span> <span style="color: #fff;">Intermediate</span></span>
+                                <span class="next-level-target"><span class="next-level-target">500 pts to go</span></span>
+                            </div>
+                            <div class="score-progress-bar" style="height: 10px;">
+                                <div class="score-fill" id="levelProgressFill" style="width: 25%"></div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1.5rem; margin-top: 1.5rem;">
+                            <!-- Streak Widget -->
+                            <div class="streak-widget" style="margin-top: 0; flex: 1;">
+                                <div class="streak-icon"></div>
+                                <div class="streak-info">
+                                    <div class="streak-label" data-i18n="daily_streak">DAILY STREAK</div>
+                                    <div class="streak-count" style="font-size: 1.5rem;">0</div>
+                                </div>
+                            </div>
+                            <div class="streak-widget" style="margin-top: 0; flex: 1; border-color: var(--primary); background: rgba(0, 212, 170, 0.05);">
+                                <div class="streak-icon"></div>
+                                <div class="streak-info">
+                                    <div class="streak-label" data-i18n="weekly_goal">WEEKLY GOAL</div>
+                                    <div class="streak-bar">
+                                        <div class="streak-fill" style="width: 40%; background: var(--primary);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Emissions Card -->
+            <div class="card emissions-summary-card reveal">
+                <div class="card-header">
+                    <h3 data-i18n="impact_breakdown">Impact Breakdown</h3>
+                    <select class="period-select" id="emissionPeriod" onchange="updateEmissionDisplay()">
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month" selected data-i18n="this_month">This Month</option>
+                    </select>
+                </div>
+                <div class="emissions-total" id="emissionsTotal">
+                    <span class="emission-value" id="emissionValue">0.0</span>
+                    <span class="emission-unit">KG CO₂E</span>
+                </div>
+                <div class="emission-breakdown" id="emissionBreakdown">
+                    <div class="breakdown-item" data-cat="transport">
+                        <span class="breakdown-icon"></span>
+                        <div class="breakdown-bar-wrap">
+                            <span class="breakdown-label" data-i18n="transport_label"
+                                data-i18n="transport_label">TRANSPORTATION</span>
+                            <div class="breakdown-bar">
+                                <div class="breakdown-fill transport-fill" id="transportFill" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <span class="breakdown-val" id="transportVal">0 kg</span>
+                    </div>
+                    <div class="breakdown-item" data-cat="electricity">
+                        <span class="breakdown-icon"></span>
+                        <div class="breakdown-bar-wrap">
+                            <span class="breakdown-label" data-i18n="electricity_label"
+                                data-i18n="electricity_label">ELECTRICITY</span>
+                            <div class="breakdown-bar">
+                                <div class="breakdown-fill electricity-fill" id="electricFill" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <span class="breakdown-val" id="electricVal">0 kg</span>
+                    </div>
+                    <div class="breakdown-item" data-cat="food">
+                        <span class="breakdown-icon"></span>
+                        <div class="breakdown-bar-wrap">
+                            <span class="breakdown-label" data-i18n="diet_label" data-i18n="diet_label">DIET &
+                                MEALS</span>
+                            <div class="breakdown-bar">
+                                <div class="breakdown-fill food-fill" id="foodFill" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <span class="breakdown-val" id="foodVal">0 kg</span>
+                    </div>
+                </div>
+                <p id="electricityNote" style="
+                    font-size: 0.72rem;
+                    color: var(--text-muted);
+                    margin-top: 0.75rem;
+                    line-height: 1.5;
+                    padding: 0 0.25rem;
+                    background: rgba(245,158,11,0.06);
+                    border: 1px solid rgba(245,158,11,0.12);
+                    border-radius: 8px;
+                    padding: 0.4rem 0.75rem;
+                    display: none;
+                "></p>
+            </div>
+
+            <!-- Trend Chart -->
+            <div class="card chart-card full-width reveal">
+                <div class="activity-table-header"
+                    style="padding: 1rem 0 1.5rem 0; display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="font-family:'Space Grotesk'; font-size:1.1rem;" data-i18n="emission_analytics"
+                        data-i18n="emission_analytics">Emission Analytics</h3>
+                    <div class="chart-controls">
+                        <button class="chart-btn active" onclick="updateChart('week', this)">7D</button>
+                        <button class="chart-btn" onclick="updateChart('month', this)">30D</button>
+                        <button class="chart-btn" onclick="updateChart('year', this)">1Y</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="trendChart"></canvas>
+                    <div id="chartEmptyState" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); border-radius: 12px; display: none;">
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;"><span data-i18n="chart_empty_msg">Your analytics will appear here after your first log.</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Donut Chart -->
+            <div class="card donut-card reveal">
+                <div class="card-header">
+                    <h3><span data-i18n="emissions_split">Emissions Split</span></h3>
+                </div>
+                <div class="chart-wrapper-small">
+                    <canvas id="donutChart"></canvas>
+                </div>
+                <div class="donut-legend" id="donutLegend" style="margin-top: 1rem;"></div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card quick-stats-card reveal">
+                <div class="card-header">
+                    <h3><span data-i18n="performance">Performance</span></h3>
+                </div>
+                                  <div class="qstat">
+                        <span class="qstat-icon"></span>
+                        <div class="qstat-val" id="treesNeeded">--</div>
+                        <div class="qstat-label"><div class="qstat-label" data-i18n="trees_needed_label">TREES NEEDED</div></div>
+                    </div>
+                    <div class="qstat">
+                        <span class="qstat-icon"></span>
+                        <div class="qstat-val" id="solarSavings">--</div>
+                        <div class="qstat-label"><div class="qstat-label" data-i18n="solar_gain_label">SOLAR GAIN</div></div>
+                    </div>
+                    <div class="qstat">
+                        <span class="qstat-icon"></span>
+                        <div class="qstat-val" id="userRank">#--</div>
+                        <div class="qstat-label"><div class="qstat-label" data-i18n="campus_rank_label">CAMPUS RANK</div></div>
+                    </div>
+                    <div class="qstat">
+                        <span class="qstat-icon"></span>
+                        <div class="qstat-val" id="reductionPct">--</div>
+                        <div class="qstat-label"><div class="qstat-label" data-i18n="reduction_label">REDUCTION</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regional Benchmark Comparison (New Requirement) -->
+            <div class="card regional-benchmark-card reveal" style="grid-column: span 1;">
+                <div class="card-header">
+                    <h3><span data-i18n="carbon_benchmarks">Carbon Benchmarks</span></h3>
+                    <div id="userZoneBadge" class="badge-live" style="background:var(--primary); color:#000;">GLOBAL
+                    </div>
+                </div>
+                <!-- Mini Map Section -->
+                <div id="miniMap"
+                    style="height: 180px; border-radius: 12px; margin: 10px 0; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); overflow: hidden; z-index: 10;">
+                    <div
+                        style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-muted); font-size:0.8rem;">
+                        <span class="loading-spinner"></span> Calibrating Geo-Grid...
+                    </div>
+                </div>
+                <div class="benchmark-content" style="padding: 0.5rem 0;">
+                    <div class="benchmark-item" style="margin-bottom: 1.5rem;">
+                        <div
+                            style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem;">
+                            <span style="color:var(--text-secondary);"><span data-i18n="vs_india_national_avg">vs India National Avg</span></span>
+                            <span style="font-weight:700;"><span data-i18n="national_limit">5.2 kg/day</span></span>
+                        </div>
+                        <div
+                            style="height:8px; background:rgba(255,255,255,0.05); border-radius:4px; position:relative; overflow:hidden;">
+                            <div id="nationalAvgFill"
+                                style="position:absolute; height:100%; width:0%; background:#3B82F6; transition:1.5s ease-out;">
+                            </div>
+                            <div id="userAvgMarkerNational"
+                                style="position:absolute; height:100%; width:2px; background:#fff; left:0%; z-index:2; box-shadow:0 0 10px #fff;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="benchmark-item">
+                        <div
+                            style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem;">
+                            <span style="color:var(--text-secondary);" id="zoneAvgLabel"><span data-i18n="vs_zone_avg">vs Zone Average</span></span>
+                            <span style="font-weight:700;" id="zoneAvgVal">-- kg/day</span>
+                        </div>
+                        <div
+                            style="height:8px; background:rgba(255,255,255,0.05); border-radius:4px; position:relative; overflow:hidden;">
+                            <div id="zoneAvgFill"
+                                style="position:absolute; height:100%; width:0%; background:var(--primary); transition:1.5s ease-out;">
+                            </div>
+                            <div id="userAvgMarkerZone"
+                                style="position:absolute; height:100%; width:2px; background:#fff; left:0%; z-index:2; box-shadow:0 0 10px #fff;">
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size:0.7rem; color:var(--text-muted); margin-top:1.25rem; line-height:1.4; display: flex; align-items: center; gap: 6px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A5 5 0 0 0 8 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line></svg>
+                        Your white marker relative to the bars shows your daily average performance.
+                    </p>
+                </div>
+            </div>
+
+            <!-- <span data-i18n="ai_recommendations">AI Recommendations</span> Preview -->
+            <div class="card recommendations-preview-card full-width reveal">
+                <div class="card-header">
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <h3><span data-i18n="ai_recommendations">AI Recommendations</span></h3>
+                    </div>
+                    <a href="recommendations.html" class="view-all-link"><a href="recommendations.html" class="view-all-link" data-i18n="full_report">Full Report →</a></a>
+                </div>
+                <div class="recs-grid" id="dashboardRecs"></div>
+            </div>
+
+            <!-- <span data-i18n="active_challenges">Active Challenges</span> -->
+            <div class="card challenges-card full-width reveal">
+                <div class="card-header">
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <h3><span data-i18n="active_challenges">Active Challenges</span></h3>
+                    </div>
+                </div>
+                <div class="challenges-grid" id="dashboardChallenges">
+                    <!-- Populated by renderChallengesWithNotifications() in app.js -->
+                </div>
+            </div>
+
+            <!-- Recent Activity Table-style -->
+            <div class="card activity-card full-width reveal">
+                <div class="card-header">
+                    <h3><span data-i18n="recent_global_activities">Recent Global Activities</span></h3>
+                    <div class="badge-live"><span data-i18n="live_feed">LIVE FEED</span></div>
+                </div>
+                <div class="activity-list" id="activityList">
+                    <div class="empty-state">Securely fetching your environmental logs...</div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+
+
+    <script src="js/i18n.js?v=5.2"></script>
+    <script src="js/app.js?v=5.2"></script>
+    <script src="js/autolog.js?v=5.2"></script>
+    <script src="js/chat.js?v=5.2"></script>
+    <script src="js/recommendations.js?v=5.2"></script>
+    <script src="js/dashboard.js?v=5.2"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+    <script>
+        // Profile dropdown toggle
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('profileDropdown');
+            const avatar = document.getElementById('topNavAvatar');
+            if (dropdown && avatar && !avatar.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Inline observer for dashboard reveal
+        const dashObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    dashObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => dashObserver.observe(el));
+    </script>
+</body>
+
+</html>

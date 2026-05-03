@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Insights – EcoTrack AI</title>
+    <script src="js/i18n.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+</head>
+
+<body class="app-body">
+    <!-- Mobile sidebar backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo"><span class="logo-text">EcoTrack <b>AI</b></span></div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item"><span
+                    class="nav-label" data-i18n="nav_dashboard">Dashboard</span></a>
+            <a href="report.html" class="nav-item" id="nav-report">
+                <span class="nav-label" data-i18n="nav_report">Report Dashboard</span>
+            </a>
+
+            <a href="calculator.html" class="nav-item"><span
+                    class="nav-label" data-i18n="nav_calculator">Calculator</span></a>
+            <a href="history.html" class="nav-item"><span
+                    class="nav-label" data-i18n="nav_history">History</span></a>
+            <a href="recommendations.html" class="nav-item active"><span
+                    class="nav-label" data-i18n="nav_insights">AI Insights</span></a>
+            <a href="leaderboard.html" class="nav-item"><span
+                    class="nav-label" data-i18n="nav_leaderboard">Leaderboard</span></a>
+            <a href="offset.html" class="nav-item"><span class="nav-label" data-i18n="nav_offset">Offset Tools</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-mini-profile">
+                <div class="user-avatar" id="sidebarAvatar">A</div>
+                <div class="user-info">
+                    <div class="user-name" id="sidebarName">Loading...</div>
+                    <div class="user-score-badge" id="sidebarScore">EcoScore: --</div>
+                </div>
+            </div>
+                        <div class="lang-toggle" style="margin-bottom: 1rem; padding: 0 1rem; display: flex; gap: 0.5rem;">
+                <button onclick="switchLanguage('en')" data-lang="en" class="lang-btn"
+                    style="font-size: 0.7rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.3rem 0.6rem; border-radius: 8px; cursor: pointer; transition:0.2s;">EN</button>
+                <button onclick="switchLanguage('hi')" data-lang="hi" class="lang-btn"
+                    style="font-size: 0.7rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.3rem 0.6rem; border-radius: 8px; cursor: pointer; transition:0.2s;">HI</button>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle Navigation">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <h1 class="page-title" data-i18n="rec_title">AI Insights & Predictions</h1>
+            </div>
+        </header>
+
+        <div class="recs-page-wrapper">
+
+            <!-- NEW: Real AI Coach Section -->
+            <div class="card ai-coach-card full-width"
+                style="border-left: 5px solid var(--primary); margin-bottom: 2rem;">
+                <div class="card-header" style="justify-content: flex-start; gap: 1rem;">
+                    <span></span>
+                    <div>
+                        <h3 style="font-family: 'Space Grotesk'; font-size: 1.4rem;" data-i18n="ecocoach_title">EcoCoach AI Analysis</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);" data-i18n="ecocoach_sub">GPT-Powered Personalized Guidance</p>
+                    </div>
+                </div>
+                <div class="ai-coach-content" id="aiCoachContent"
+                    style="padding: 1rem; line-height: 1.6; color: var(--text-primary);">
+                    <div class="loading-spinner"></div>
+                    <p style="color: var(--text-muted)" data-i18n="analyzing">EcoCoach is analyzing your footprint...</p>
+                </div>
+            </div>
+
+            <!-- AI Prediction Summary -->
+            <div class="card ai-prediction-card full-width">
+                <div class="ai-header-stripe">
+                    <div class="ai-brain-icon"></div>
+                    <div class="ai-header-text">
+                        <h2 data-i18n="ai_carbon_analysis">Your AI Carbon Analysis</h2>
+                        <p data-i18n="ml_model_note">Based on your activity patterns, our ML model predicts your future emissions</p>
+                    </div>
+                    <div class="ai-confidence-badge" data-i18n="accuracy">97% Accuracy</div>
+                </div>
+                <div class="ai-prediction-grid">
+                    <div class="prediction-block">
+                        <div class="pred-label" data-i18n="curr_month">Current Month (est.)</div>
+                        <div class="pred-val" id="predCurrentMonth">Loading...</div>
+                        <div class="pred-unit">kg CO₂</div>
+                    </div>
+                    <div class="prediction-block highlight">
+                        <div class="pred-label" data-i18n="ai_prediction">AI Prediction (Next Month)</div>
+                        <div class="pred-val" id="predNextMonth">Loading...</div>
+                        <div class="pred-unit">kg CO₂</div>
+                    </div>
+                    <div class="prediction-block success">
+                        <div class="pred-label" data-i18n="potential_savings">Potential Savings</div>
+                        <div class="pred-val" id="predSavings">Loading...</div>
+                        <div class="pred-unit" data-i18n="follow_tips">kg CO₂ if you follow tips</div>
+                    </div>
+                </div>
+                <div class="chart-wrapper" style="height:200px; margin-top:1.5rem">
+                    <canvas id="predictionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Smart Recommendations -->
+            <div class="recs-section">
+                <div class="section-header-inline">
+                    <h2 data-i18n="smart_recs">Smart Recommendations</h2>
+                    <span class="rec-count" id="recCount">Loading...</span>
+                </div>
+
+                <div class="rec-filters">
+                    <button class="rec-filter-btn active" onclick="filterRecs('all', this)">All</button>
+                    <button class="rec-filter-btn" onclick="filterRecs('transport', this)">Transport</button>
+                    <button class="rec-filter-btn" onclick="filterRecs('electricity', this)">Electricity</button>
+                    <button class="rec-filter-btn" onclick="filterRecs('food', this)">Food</button>
+                    <button class="rec-filter-btn" onclick="filterRecs('high-impact', this)">High Impact</button>
+                </div>
+
+                <div class="recs-full-grid" id="recsFullGrid"></div>
+            </div>
+
+            <!-- Behavioral Patterns -->
+            <div class="card patterns-card full-width">
+                <div class="card-header">
+                    <h3 data-i18n="behavioral">Behavioral Pattern Analysis</h3>
+                </div>
+                <div class="patterns-grid" id="patternsGrid"></div>
+            </div>
+
+            <!-- Challenge Section -->
+            <div class="card challenges-card full-width">
+                <div class="card-header">
+                    <h3 data-i18n="eco_challenges">Eco Challenges</h3>
+                    <span class="badge-new">NEW</span>
+                </div>
+                <div class="challenges-grid" id="challengesGrid"></div>
+            </div>
+
+        </div>
+    </main>
+
+
+    <script src="js/app.js"></script>
+    <script src="js/recommendations.js"></script>
+</body>
+
+</html>
