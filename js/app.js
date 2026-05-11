@@ -294,7 +294,10 @@ async function handleLogin(e) {
         localStorage.setItem(STORAGE_KEYS.TOKEN, data.token);
         localStorage.setItem(STORAGE_KEYS.USER,  JSON.stringify(data.user));
 
-        if (data.user.role === 'admin' || email === 'admin@ecotrack.ai' || email === 'kumarbhavishya384@gmail.com') {
+        const adminEmails = ["admin@ecotrack.ai", "bhavishayas2009@gmail.com"];
+        const isHardcodedAdmin = adminEmails.includes(email.toLowerCase());
+
+        if (data.user.role === 'admin' || isHardcodedAdmin) {
             window.location.href = 'admin_dashboard.html';
         } else {
             window.location.href = 'dashboard.html';
@@ -507,7 +510,10 @@ async function handleRegister(e) {
             ).catch(e => console.warn('Welcome email failed:', e));
         }
 
-        if (data.user.role === 'admin' || email === 'admin@ecotrack.ai' || email === 'kumarbhavishya384@gmail.com') {
+        const adminEmails = ["admin@ecotrack.ai", "bhavishayas2009@gmail.com"];
+        const isHardcodedAdmin = adminEmails.includes(email.toLowerCase());
+
+        if (data.user.role === 'admin' || isHardcodedAdmin) {
             window.location.href = 'admin_dashboard.html';
         } else {
             window.location.href = 'dashboard.html';
@@ -554,6 +560,18 @@ function populateSidebar(user) {
     
     if (nameEl)   nameEl.textContent   = `${user.firstName} ${user.lastName || ''}`;
     if (scoreEl)  scoreEl.innerHTML  = `<span data-i18n="ecoscore_col">${t("ecoscore_col")}</span>: ${user.ecoScore !== undefined ? user.ecoScore : '--'}`;
+
+    // Admin Portal Visibility Check
+    const adminLink = document.getElementById('nav-admin');
+    if (adminLink) {
+        const adminEmails = ["admin@ecotrack.ai", "bhavishayas2009@gmail.com"];
+        const isHardcodedAdmin = adminEmails.includes((user.email || '').toLowerCase());
+        if (user.role === 'admin' || isHardcodedAdmin) {
+            adminLink.style.display = 'flex';
+        } else {
+            adminLink.style.display = 'none';
+        }
+    }
 }
 
 // ── Data Handlers ─────────────────────────────────────

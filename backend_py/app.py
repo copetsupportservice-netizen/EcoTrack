@@ -259,7 +259,7 @@ def _send_welcome_email_sync(user_email, first_name):
 
     # Read config from .env - strip() handles any accidental whitespace
     sender_name  = (os.getenv("COMPANY_NAME",  "EcoTrack AI")).strip()
-    sender_email = (os.getenv("COMPANY_EMAIL", "kumarbhavishya384@gmail.com")).strip()
+    sender_email = (os.getenv("COMPANY_EMAIL", "bhavishayas2009@gmail.com")).strip()
     smtp_server  = (os.getenv("SMTP_SERVER",   "smtp.gmail.com")).strip()
     smtp_user    = (os.getenv("SMTP_USER",     sender_email)).strip()
     smtp_pass_raw = os.getenv("SMTP_PASS", "")
@@ -421,7 +421,7 @@ def send_otp_email(user_email, otp_code):
 def _send_otp_email_sync(user_email, otp_code):
     """Internal synchronous function for sending OTP via email."""
     sender_name  = (os.getenv("COMPANY_NAME",  "EcoTrack AI")).strip()
-    sender_email = (os.getenv("COMPANY_EMAIL", "kumarbhavishya384@gmail.com")).strip()
+    sender_email = (os.getenv("COMPANY_EMAIL", "bhavishayas2009@gmail.com")).strip()
     smtp_server  = (os.getenv("SMTP_SERVER",   "smtp.gmail.com")).strip()
     smtp_user    = (os.getenv("SMTP_USER",     sender_email)).strip()
     smtp_pass_raw = os.getenv("SMTP_PASS", "")
@@ -564,7 +564,7 @@ def register():
             "zone": data.get('zone'),
             "zone_ef": data.get('zone_ef', 0.82),
             "zone_avg": data.get('zone_avg', 5.2),
-            "role": "admin" if email in ["admin@ecotrack.ai", "kumarbhavishya384@gmail.com"] else "user",
+            "role": "admin" if email in ["admin@ecotrack.ai", "bhavishayas2009@gmail.com"] else "user",
             "ecoScore": 0,
             "createdAt": str(datetime.now())
         }

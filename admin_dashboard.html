@@ -613,7 +613,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const user = requireAuth();
-            if (!user || user.role !== 'admin') {
+            const adminEmails = ["admin@ecotrack.ai", "bhavishayas2009@gmail.com"];
+            const isHardcodedAdmin = adminEmails.includes((user.email || '').toLowerCase());
+            
+            if (!user || (user.role !== 'admin' && !isHardcodedAdmin)) {
                 window.location.href = 'index.html';
                 return;
             }
