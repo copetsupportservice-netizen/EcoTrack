@@ -322,6 +322,22 @@ async function handleForgotPassword(e) {
             body  : JSON.stringify({ email })
         });
 
+        // ── SEND VIA EMAILJS (Consistency with registration) ──
+        if (typeof emailjs !== 'undefined' && data.otp) {
+            const templateParams = {
+                to_email: email,
+                otp: data.otp,
+                verification_code: data.otp,
+                company_name: "EcoTrack AI"
+            };
+            try {
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_OTP_TEMPLATE, templateParams);
+                console.log("Reset OTP dispatched via EmailJS");
+            } catch (ejsErr) {
+                console.warn("EmailJS failed, relying on SMTP:", ejsErr);
+            }
+        }
+
         statusEl.innerHTML     = `<strong>Code Dispatched!</strong> ${data.message}<br><br><a href="#" onclick="switchModal('forgotPasswordModal','resetPasswordModal'); document.getElementById('finalResetEmail').value='${email}'" style="color:var(--primary); font-weight:700;">Proceed to Reset</a>`;
         statusEl.style.display = 'block';
         btn.textContent        = 'Check Email';

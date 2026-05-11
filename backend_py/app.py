@@ -663,7 +663,7 @@ def forgot_password():
             {"$set": {"resetToken": reset_token, "resetTokenExpires": expiry}}
         )
         
-        # Log the reset request (Mocking email sending)
+        # Log the reset request
         base_dir = os.path.dirname(os.path.abspath(__file__))
         log_path = os.path.join(base_dir, "email_logs.txt")
         log_entry = f"[{datetime.now()}] RESET REQUEST: {email} | CODE: {reset_token}\n"
@@ -671,11 +671,15 @@ def forgot_password():
         with open(log_path, "a", encoding='utf-8') as f:
             f.write(log_entry)
             
-        print(f"FORGOT PASSWORD: Reset code {reset_token} generated for {email}")
+        # Actually send the email using SMTP
+        send_otp_email(email, reset_token)
+        
+        print(f"FORGOT PASSWORD: Reset code {reset_token} generated and sent to {email}")
         
         return jsonify({
             "success": True, 
-            "message": "A verification code has been generated and sent to your email. Please check your inbox (and spam) to proceed."
+            "message": "A verification code has been sent to your email. Please check your inbox (and spam) to proceed.",
+            "otp": reset_token # Return for EmailJS fallback if needed
         })
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
