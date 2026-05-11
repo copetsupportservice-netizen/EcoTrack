@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lastNameInput = document.getElementById('lastName');
     const emailInput = document.getElementById('email');
     const phoneInput = document.getElementById('phone');
+    const groupInput = document.getElementById('group');
     const profilePicInput = document.getElementById('profilePicInput');
     const avatarPreviewImage = document.getElementById('avatarPreviewImage');
     const avatarPlaceholderInitial = document.getElementById('avatarPlaceholderInitial');
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lastNameInput.value = user.lastName || '';
     emailInput.value = user.email || '';
     phoneInput.value = user.phone || '';
+    if (groupInput) groupInput.value = user.group || '';
 
     profileDisplayName.textContent = `${user.firstName} ${user.lastName || ''}`;
     profileEmailDisplay.textContent = user.email || '';
@@ -74,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
             firstName: firstNameInput.value.trim(),
             lastName: lastNameInput.value.trim(),
             phone: phoneInput.value.trim(),
+            group: groupInput ? groupInput.value.trim() : user.group,
             profilePic: currentProfilePicBase64
         };
 

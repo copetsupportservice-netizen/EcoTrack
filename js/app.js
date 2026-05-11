@@ -477,6 +477,8 @@ async function handleRegister(e) {
     const email     = document.getElementById('regEmail').value.trim();
     const password  = document.getElementById('regPassword').value;
     const phone     = document.getElementById('regPhone').value.trim();
+    const group     = document.getElementById('regGroup').value.trim();
+    const accountType = document.getElementById('regAccountType').value;
     const otpInput  = document.getElementById('regOTP').value.trim();
     const btn       = e.target.querySelector('button');
     const errEl     = document.getElementById('regError');
@@ -501,7 +503,7 @@ async function handleRegister(e) {
         const data = await apiFetch('/auth/register', {
             method: 'POST',
             body  : JSON.stringify({ 
-                firstName, lastName, email, phone, password, 
+                firstName, lastName, email, phone, password, group, accountType,
                 location: finalLocation,
                 state: finalLocation,
                 zone: finalZone ? finalZone.zone : null,

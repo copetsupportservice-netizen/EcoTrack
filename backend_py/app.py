@@ -564,7 +564,9 @@ def register():
             "zone": data.get('zone'),
             "zone_ef": data.get('zone_ef', 0.82),
             "zone_avg": data.get('zone_avg', 5.2),
-            "role": "admin" if email in ["admin@ecotrack.ai", "bhavishayas2009@gmail.com"] else "user",
+            "group": data.get('group', 'Unassigned'),
+            "accountType": data.get('accountType', 'user'),
+            "role": "admin" if email in ["admin@ecotrack.ai", "bhavishayas2009@gmail.com"] else data.get('accountType', 'user'),
             "ecoScore": 0,
             "createdAt": str(datetime.now())
         }
@@ -750,6 +752,7 @@ def update_profile():
             "firstName": data.get('firstName'),
             "lastName": data.get('lastName'),
             "phone": data.get('phone'),
+            "group": data.get('group'),
             "profilePic": data.get('profilePic')
         }
         # Clean None values
