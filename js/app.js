@@ -271,8 +271,17 @@ async function apiFetch(endpoint, options = {}) {
 
 // ── Auth Functions ────────────────────────────────────
 function getCurrentUser() {
-    const userStr = localStorage.getItem(STORAGE_KEYS.USER);
-    return userStr ? JSON.parse(userStr) : null;
+    try {
+        const userStr = localStorage.getItem(STORAGE_KEYS.USER);
+        const user = userStr ? JSON.parse(userStr) : null;
+        if (user && !user.email) {
+            console.warn("User object in storage is missing email. This might cause admin access issues.");
+        }
+        return user;
+    } catch (e) {
+        console.error("Error parsing user from storage:", e);
+        return null;
+    }
 }
 
 async function handleLogin(e) {
@@ -291,8 +300,10 @@ async function handleLogin(e) {
             body  : JSON.stringify({ email, password })
         });
 
+        // Ensure email is in the user object for hardcoded checks
+        const userToSave = { ...data.user, email: email.toLowerCase() };
         localStorage.setItem(STORAGE_KEYS.TOKEN, data.token);
-        localStorage.setItem(STORAGE_KEYS.USER,  JSON.stringify(data.user));
+        localStorage.setItem(STORAGE_KEYS.USER,  JSON.stringify(userToSave));
 
         const adminEmails = ["admin@ecotrack.ai", "bhavishayas2009@gmail.com"];
         const isHardcodedAdmin = adminEmails.includes(email.toLowerCase());
@@ -499,8 +510,10 @@ async function handleRegister(e) {
             })
         });
 
+        // Ensure email is in the user object for hardcoded checks
+        const userToSave = { ...data.user, email: email.toLowerCase() };
         localStorage.setItem(STORAGE_KEYS.TOKEN, data.token);
-        localStorage.setItem(STORAGE_KEYS.USER,  JSON.stringify(data.user));
+        localStorage.setItem(STORAGE_KEYS.USER,  JSON.stringify(userToSave));
 
         if (typeof emailjs !== 'undefined') {
             emailjs.send(

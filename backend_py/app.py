@@ -927,7 +927,11 @@ def get_leaderboard():
 @app.route('/api/admin/stats', methods=['GET'])
 @token_required
 def get_admin_stats():
-    if request.user.get('role') != 'admin':
+    user_role = request.user.get('role')
+    user_email = (request.user.get('email') or "").lower()
+    admin_emails = ["admin@ecotrack.ai", "bhavishayas2009@gmail.com"]
+    
+    if user_role != 'admin' and user_email not in admin_emails:
         return jsonify({"success": False, "message": "Access denied"}), 403
     
     total_users = users_col.count_documents({}) if use_mongodb else len(load_local_db()["users"])
@@ -968,7 +972,11 @@ def safe_serialize(doc):
 @app.route('/api/admin/users', methods=['GET'])
 @token_required
 def get_admin_users():
-    if request.user.get('role') != 'admin':
+    user_role = request.user.get('role')
+    user_email = (request.user.get('email') or "").lower()
+    admin_emails = ["admin@ecotrack.ai", "bhavishayas2009@gmail.com"]
+    
+    if user_role != 'admin' and user_email not in admin_emails:
         return jsonify({"success": False, "message": "Access denied"}), 403
 
     try:
@@ -987,7 +995,11 @@ def get_admin_users():
 @app.route('/api/admin/users/<uid>', methods=['DELETE'])
 @token_required
 def delete_user(uid):
-    if request.user.get('role') != 'admin':
+    user_role = request.user.get('role')
+    user_email = (request.user.get('email') or "").lower()
+    admin_emails = ["admin@ecotrack.ai", "bhavishayas2009@gmail.com"]
+    
+    if user_role != 'admin' and user_email not in admin_emails:
         return jsonify({"success": False, "message": "Access denied"}), 403
     
     if use_mongodb:
@@ -1005,7 +1017,11 @@ def delete_user(uid):
 @app.route('/api/admin/users/<uid>/role', methods=['PUT'])
 @token_required
 def update_user_role(uid):
-    if request.user.get('role') != 'admin':
+    user_role = request.user.get('role')
+    user_email = (request.user.get('email') or "").lower()
+    admin_emails = ["admin@ecotrack.ai", "bhavishayas2009@gmail.com"]
+    
+    if user_role != 'admin' and user_email not in admin_emails:
         return jsonify({"success": False, "message": "Access denied"}), 403
     data = request.get_json()
     new_role = data.get('role', '').strip()
