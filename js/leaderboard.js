@@ -160,7 +160,7 @@ async function generateShareCard() {
     </div>`);
 }
 
-function renderNGOTab(user, dynamicNGOs) {
+function renderNGOTab(user, dynamicNGOs = []) {
     const grid = document.getElementById('ngoGrid');
     if (!grid) return;
     
@@ -213,7 +213,7 @@ async function joinNGO(name) {
             localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
             
             // Refresh UI
-            renderNGOTab(user);
+            loadLeaderboard(user);
             renderBadges(user);
         }
     } catch (err) {

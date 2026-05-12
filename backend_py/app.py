@@ -943,7 +943,50 @@ def get_leaderboard():
         "leaderboard": lb,
         "groups": group_lb,
         "registeredNGOs": registered_ngos,
-        "myRank": next((i+1 for i, u in enumerate(sorted_users) if str(u.get('_id')) == str(request.user.get('_id'))), None)
+        "myRank": next((i+1 for i, u in enumerate(sorted_users) if str(u.get('_id')) == str(request.user.get('_id'))), None),
+        "myScore": request.user.get('ecoScore', 0)
+    })
+
+@app.route('/api/ngo/join', methods=['POST'])
+@token_required
+def join_ngo():
+    data = request.get_json()
+    ngo_name = data.get('ngoName')
+    
+    if not ngo_name:
+        return jsonify({"success": False, "message": "NGO name is required"}), 400
+    
+    user_id = str(request.user.get('_id'))
+    
+    if use_mongodb:
+        user = users_col.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+            
+        joined = user.get('joinedNGOs', [])
+        if ngo_name in joined:
+            return jsonify({"success": True, "message": f"You are already a partner of {ngo_name}!"})
+            
+        joined.append(ngo_name)
+        users_col.update_one({"_id": ObjectId(user_id)}, {"$set": {"joinedNGOs": joined}})
+    else:
+        db = load_local_db()
+        user = next((u for u in db["users"] if str(u.get('_id')) == user_id), None)
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+            
+        joined = user.get('joinedNGOs', [])
+        if ngo_name in joined:
+            return jsonify({"success": True, "message": f"You are already a partner of {ngo_name}!"})
+            
+        joined.append(ngo_name)
+        user['joinedNGOs'] = joined
+        save_local_db(db)
+        
+    return jsonify({
+        "success": True, 
+        "message": f"Successfully joined {ngo_name}! You've earned the Eco-Partner badge.",
+        "joinedNGOs": joined
     })
 
 # ── Admin Routes ───────────────────────────────────────
