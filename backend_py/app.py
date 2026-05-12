@@ -26,9 +26,6 @@ def is_valid_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
 # Load environment variables
-# Load environment variables from .env file (using absolute path)
-env_path = os.path.join(os.path.dirname(__file__), ".env")
-# Load environment variables from .env file (using absolute path)
 env_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path=env_path)
 
@@ -486,9 +483,6 @@ def send_otp():
                 f.write(f"[{datetime.now()}] OTP REQUEST: {email} (Code generated)\n")
         except: pass
 
-        otp = str(random.randint(100000, 999999))
-        expiry = (datetime.utcnow() + timedelta(minutes=10)).isoformat()
-
         # Store OTP against email (upsert)
         otps_col.update_one(
             {"email": email},
@@ -496,12 +490,12 @@ def send_otp():
             upsert=True
         )
 
-        # We now return the OTP to the frontend so it can be sent via EmailJS as requested.
+        # Return the OTP to the frontend
         print(f"OTP generated for {email} (Returning to frontend for EmailJS)")
         return jsonify({
             "success": True, 
             "message": "OTP generated successfully", 
-            "otp": otp # Returning the code for EmailJS to pick up
+            "otp": otp 
         })
 
     except Exception as e:
@@ -947,47 +941,6 @@ def get_leaderboard():
         "myScore": request.user.get('ecoScore', 0)
     })
 
-@app.route('/api/ngo/join', methods=['POST'])
-@token_required
-def join_ngo():
-    data = request.get_json()
-    ngo_name = data.get('ngoName')
-    
-    if not ngo_name:
-        return jsonify({"success": False, "message": "NGO name is required"}), 400
-    
-    user_id = str(request.user.get('_id'))
-    
-    if use_mongodb:
-        user = users_col.find_one({"_id": ObjectId(user_id)})
-        if not user:
-            return jsonify({"success": False, "message": "User not found"}), 404
-            
-        joined = user.get('joinedNGOs', [])
-        if ngo_name in joined:
-            return jsonify({"success": True, "message": f"You are already a partner of {ngo_name}!"})
-            
-        joined.append(ngo_name)
-        users_col.update_one({"_id": ObjectId(user_id)}, {"$set": {"joinedNGOs": joined}})
-    else:
-        db = load_local_db()
-        user = next((u for u in db["users"] if str(u.get('_id')) == user_id), None)
-        if not user:
-            return jsonify({"success": False, "message": "User not found"}), 404
-            
-        joined = user.get('joinedNGOs', [])
-        if ngo_name in joined:
-            return jsonify({"success": True, "message": f"You are already a partner of {ngo_name}!"})
-            
-        joined.append(ngo_name)
-        user['joinedNGOs'] = joined
-        save_local_db(db)
-        
-    return jsonify({
-        "success": True, 
-        "message": f"Successfully joined {ngo_name}! You've earned the Eco-Partner badge.",
-        "joinedNGOs": joined
-    })
 
 # ── Admin Routes ───────────────────────────────────────
 @app.route('/api/admin/stats', methods=['GET'])
@@ -1104,6 +1057,35 @@ def update_user_role(uid):
                     break
             save_local_db(db_data)
         return jsonify({"success": True, "message": f"Role updated to {new_role}"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+# ── NGO Routes ────────────────────────────────────────
+@app.route('/api/ngo/join', methods=['POST'])
+@token_required
+def join_ngo():
+    try:
+        data = request.json
+        ngo_name = data.get('ngoName')
+        if not ngo_name:
+            return jsonify({"success": False, "message": "NGO Name is required"}), 400
+        
+        uid = request.user['_id']
+        
+        # Add NGO to user's joined list
+        if use_mongodb:
+            users_col.update_one({"_id": uid}, {"$addToSet": {"joinedNGOs": ngo_name}})
+        else:
+            db_data = load_local_db()
+            for u in db_data["users"]:
+                if str(u.get("_id")) == str(uid):
+                    if "joinedNGOs" not in u: u["joinedNGOs"] = []
+                    if ngo_name not in u["joinedNGOs"]:
+                        u["joinedNGOs"].append(ngo_name)
+                    break
+            save_local_db(db_data)
+            
+        return jsonify({"success": True, "message": f"Successfully joined {ngo_name}!"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -1395,11 +1377,10 @@ def predict_footprint():
 @app.route('/api/ai/chat', methods=['POST'])
 @token_required
 def ai_chat():
-    data = request.json
-    lang = data.get('lang', 'en')
     try:
         data = request.json
         user_msg = data.get('message', '')
+        lang = data.get('lang', 'en')
         uid = request.user['_id']
         user_name = request.user.get('firstName', 'there')
 
