@@ -1044,6 +1044,69 @@ def update_user_role(uid):
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
+# ── NGO Routes ────────────────────────────────────────
+@app.route('/api/ngo/join', methods=['POST'])
+@token_required
+def join_ngo():
+    try:
+        data = request.json
+        ngo_name = data.get('ngoName')
+        if not ngo_name:
+            return jsonify({"success": False, "message": "NGO Name is required"}), 400
+        
+        uid = request.user['_id']
+        
+        # Add NGO to user's joined list
+        if use_mongodb:
+            users_col.update_one({"_id": uid}, {"$addToSet": {"joinedNGOs": ngo_name}})
+        else:
+            db_data = load_local_db()
+            for u in db_data["users"]:
+                if str(u.get("_id")) == str(uid):
+                    if "joinedNGOs" not in u: u["joinedNGOs"] = []
+                    if ngo_name not in u["joinedNGOs"]:
+                        u["joinedNGOs"].append(ngo_name)
+                    break
+            save_local_db(db_data)
+            
+        return jsonify({"success": True, "message": f"Successfully joined {ngo_name}!"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/ngo/members', methods=['GET'])
+@token_required
+def get_ngo_members():
+    # Only users with role 'ngo' or 'admin' can access this
+    if request.user.get('role') not in ['ngo', 'admin']:
+        return jsonify({"success": False, "message": "Access denied. NGO account required."}), 403
+    
+    try:
+        # In this project, an NGO's members are users who have the NGO's name in their joinedNGOs list.
+        # For simplicity, we assume the NGO's name is stored in the 'group' field of the NGO user itself.
+        ngo_identity = request.user.get('group') # The name of the NGO this user represents
+        
+        if not ngo_identity:
+            return jsonify({"success": False, "message": "NGO identity not configured. Set your Organization name in profile."}), 400
+
+        if use_mongodb:
+            # Find users who have this NGO in their joinedNGOs list
+            members = list(users_col.find({"joinedNGOs": ngo_identity}, {"password": 0}))
+        else:
+            db_data = load_local_db()
+            members = [u for u in db_data["users"] if ngo_identity in u.get("joinedNGOs", [])]
+            
+        # Serialize
+        results = [safe_serialize(m) for m in members]
+        
+        return jsonify({
+            "success": True, 
+            "ngoName": ngo_identity,
+            "members": results,
+            "total": len(results)
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @app.route('/api/recommendations', methods=['GET'])
 @token_required
 def get_recommendations():

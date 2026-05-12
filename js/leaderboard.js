@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await loadLeaderboard();
     renderBadges(user);
-    renderNGOTab();
+    renderNGOTab(user);
 });
 
 // ── Load Leaderboard ──────────────────────────────────
@@ -182,38 +182,77 @@ async function generateShareCard() {
     </div>`);
 }
 
-function renderNGOTab() {
+function renderNGOTab(user) {
     const grid = document.getElementById('ngoGrid');
     if (!grid) return;
     const ngoOrgs = [
-        { icon: '', name: 'Green India Foundation', tag: 'Reforestation', members: 1240, co2: '52k kg' },
-        { icon: '', name: 'Solar Warriors', tag: 'Renewable', members: 890, co2: '38k kg' },
-        { icon: '', name: 'CSR CleanAir', tag: 'Corporate', members: 3200, co2: '1.2M kg' }
+        { icon: '🌱', name: 'Green India Foundation', tag: 'Reforestation', members: 1240, co2: '52k kg' },
+        { icon: '☀️', name: 'Solar Warriors', tag: 'Renewable', members: 890, co2: '38k kg' },
+        { icon: '☁️', name: 'CSR CleanAir', tag: 'Corporate', members: 3200, co2: '1.2M kg' }
     ];
-    grid.innerHTML = ngoOrgs.map(org => `
-    <div class="ngo-card">
-      <div class="ngo-icon">${org.icon}</div>
-      <div class="ngo-name">${org.name}</div>
-      <div class="ngo-tag">${org.tag}</div>
-      <button class="ngo-partner-btn" onclick="showGlobalToast('Joined ${org.name}!')">Join Partner</button>
-    </div>
-  `).join('');
+    
+    const joinedNGOs = user.joinedNGOs || [];
+
+    grid.innerHTML = ngoOrgs.map(org => {
+        const isJoined = joinedNGOs.includes(org.name);
+        return `
+            <div class="ngo-card ${isJoined ? 'joined' : ''}">
+              <div class="ngo-icon">${org.icon}</div>
+              <div class="ngo-name">${org.name}</div>
+              <div class="ngo-tag">${org.tag}</div>
+              <button class="ngo-partner-btn" ${isJoined ? 'disabled' : ''} onclick="joinNGO('${org.name}')">
+                ${isJoined ? '✓ Joined' : 'Join Partner'}
+              </button>
+            </div>
+        `;
+    }).join('');
+}
+
+async function joinNGO(name) {
+    try {
+        const res = await apiFetch('/ngo/join', {
+            method: 'POST',
+            body: JSON.stringify({ ngoName: name })
+        });
+        
+        if (res.success) {
+            showGlobalToast(res.message);
+            // Update local user object
+            const user = getCurrentUser();
+            if (!user.joinedNGOs) user.joinedNGOs = [];
+            if (!user.joinedNGOs.includes(name)) user.joinedNGOs.push(name);
+            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+            
+            // Refresh UI
+            renderNGOTab(user);
+            renderBadges(user);
+        }
+    } catch (err) {
+        showGlobalToast(err.message, "error");
+    }
 }
 
 // ── Badges ────────────────────────────────────────────
 function renderBadges(user) {
     const grid = document.getElementById('badgesGrid');
     if (!grid) return;
+    
+    const hasJoinedNGO = user.joinedNGOs && user.joinedNGOs.length > 0;
+
     const badges = [
-        { icon: '', name: 'First Step', desc: 'Logged your first entry', earned: true },
-        { icon: '', name: 'EcoChampion', desc: 'EcoScore above 600', earned: user.ecoScore >= 600 },
-        { icon: '', name: 'Earth Defender', desc: 'Tracked regularly', earned: true }
+        { icon: '🚀', name: 'First Step', desc: 'Logged your first entry', earned: true },
+        { icon: '🏆', name: 'EcoChampion', desc: 'EcoScore above 600', earned: user.ecoScore >= 600 },
+        { icon: '🛡️', name: 'Earth Defender', desc: 'Tracked regularly', earned: true },
+        { icon: '🤝', name: 'Eco-Partner', desc: 'Joined a green organization', earned: hasJoinedNGO }
     ];
     grid.innerHTML = badges.map(b => `
     <div class="badge-item ${b.earned ? 'earned' : 'locked'}">
       <div class="badge-icon">${b.icon}</div>
       <div class="badge-name">${b.name}</div>
-      ${b.earned ? 'Earned' : 'Locked'}
+      <div class="badge-desc" style="font-size:0.7rem; color:var(--text-muted); margin-top:4px;">${b.desc}</div>
+      <div style="font-size:0.75rem; margin-top:8px; font-weight:600; color:${b.earned ? 'var(--primary)' : 'var(--text-muted)'}">
+        ${b.earned ? '✓ Earned' : '🔒 Locked'}
+      </div>
     </div>
   `).join('');
 }

@@ -310,6 +310,8 @@ async function handleLogin(e) {
 
         if (data.user.role === 'admin' || isHardcodedAdmin) {
             window.location.href = 'admin_dashboard.html';
+        } else if (data.user.role === 'ngo') {
+            window.location.href = 'ngo_dashboard.html';
         } else {
             window.location.href = 'dashboard.html';
         }
@@ -530,6 +532,8 @@ async function handleRegister(e) {
 
         if (data.user.role === 'admin' || isHardcodedAdmin) {
             window.location.href = 'admin_dashboard.html';
+        } else if (data.user.role === 'ngo') {
+            window.location.href = 'ngo_dashboard.html';
         } else {
             window.location.href = 'dashboard.html';
         }
