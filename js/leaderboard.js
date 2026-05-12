@@ -6,13 +6,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const user = getCurrentUser();
     if (!user) return;
 
-    await loadLeaderboard();
+    await loadLeaderboard(user);
     renderBadges(user);
-    renderNGOTab(user);
 });
 
 // ── Load Leaderboard ──────────────────────────────────
-async function loadLeaderboard() {
+async function loadLeaderboard(user) {
     try {
         const res = await apiFetch('/leaderboard');
         const data = res.leaderboard;
@@ -21,7 +20,7 @@ async function loadLeaderboard() {
         renderMyRankBanner(res.myRank, res.myScore);
         renderPodium(data);
         renderLeaderboardList(data);
-        renderGroupLeaderboard(groups);
+        renderNGOTab(user, res.registeredNGOs || []);
     } catch (err) {
         console.error("Leaderboard load fail:", err);
         showGlobalToast("Failed to sync leaderboard with MongoDB");
@@ -86,30 +85,7 @@ function renderLeaderboardList(data) {
     }).join('');
 }
 
-function renderGroupLeaderboard(groups) {
-    const list = document.getElementById('groupLeaderboardList');
-    if (!list) return;
 
-    if (groups.length === 0) {
-        list.innerHTML = '<div class="empty-state">No campus groups active yet. Start one!</div>';
-        return;
-    }
-
-    list.innerHTML = groups.map((g, idx) => `
-        <div class="lb-row">
-            <div class="lb-rank-num">${idx + 1}</div>
-            <div class="lb-avatar" style="background: var(--primary); color:white"></div>
-            <div class="lb-name-wrap">
-                <div class="lb-name">${g.name}</div>
-                <div class="lb-location">${g.members} Members active</div>
-            </div>
-            <div style="text-align:right">
-                <div class="lb-score">${g.avgScore}</div>
-                <div class="lb-tier" style="color:var(--primary)">Avg. Score</div>
-            </div>
-        </div>
-    `).join('');
-}
 
 function getAvatarGradient(idx) {
     const gradients = ['#3b82f6', '#a855f7', '#f97316', '#ef4444', '#14b8a6'];
@@ -121,9 +97,11 @@ function switchLbTab(tab, btn) {
     document.querySelectorAll('.lb-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('tab-individual').style.display = tab === 'individual' ? 'block' : 'none';
-    document.getElementById('tab-groups').style.display = tab === 'groups' ? 'block' : 'none';
     document.getElementById('tab-ngo').style.display = tab === 'ngo' ? 'block' : 'none';
-    if (tab === 'ngo') renderNGOTab();
+    if (tab === 'ngo') {
+        const user = getCurrentUser();
+        loadLeaderboard(user); // Re-fetch to ensure fresh dynamic NGOs
+    }
 }
 
 // ── Impact Share Card (Canvas) ────────────────────────
@@ -182,18 +160,29 @@ async function generateShareCard() {
     </div>`);
 }
 
-function renderNGOTab(user) {
+function renderNGOTab(user, dynamicNGOs) {
     const grid = document.getElementById('ngoGrid');
     if (!grid) return;
-    const ngoOrgs = [
-        { icon: '🌱', name: 'Green India Foundation', tag: 'Reforestation', members: 1240, co2: '52k kg' },
-        { icon: '☀️', name: 'Solar Warriors', tag: 'Renewable', members: 890, co2: '38k kg' },
-        { icon: '☁️', name: 'CSR CleanAir', tag: 'Corporate', members: 3200, co2: '1.2M kg' }
+    
+    // Combine hardcoded sample NGOs with real registered ones
+    const staticNGOs = [
+        { icon: '🌱', name: 'Green India Foundation', tag: 'Reforestation' },
+        { icon: '☀️', name: 'Solar Warriors', tag: 'Renewable' },
+        { icon: '☁️', name: 'CSR CleanAir', tag: 'Corporate' }
     ];
+    
+    // Map dynamic ones to the same format
+    const realNGOs = dynamicNGOs.map(ngo => ({
+        icon: '🏢',
+        name: ngo.name,
+        tag: 'Partner Organization'
+    }));
+
+    const allNGOs = [...realNGOs, ...staticNGOs];
     
     const joinedNGOs = user.joinedNGOs || [];
 
-    grid.innerHTML = ngoOrgs.map(org => {
+    grid.innerHTML = allNGOs.map(org => {
         const isJoined = joinedNGOs.includes(org.name);
         return `
             <div class="ngo-card ${isJoined ? 'joined' : ''}">

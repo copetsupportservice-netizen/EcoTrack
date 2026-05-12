@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Campus Leaderboard – EcoTrack AI</title>
+    <title>EcoTrack Leaderboard</title>
     <script src="js/i18n.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
@@ -62,7 +62,7 @@
                 <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle Navigation">
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 </button>
-                <h1 class="page-title" data-i18n="lb_title">Campus Leaderboard</h1>
+                <h1 class="page-title" data-i18n="lb_title">EcoTrack Leaderboard</h1>
             </div>
             <div class="topbar-right">
                 <select class="period-select" id="leaderboardPeriod" onchange="loadLeaderboard()">
@@ -126,7 +126,6 @@
                     <h3 data-i18n="full_rankings">Full Rankings</h3>
                     <div class="lb-tabs">
                         <button class="lb-tab active" onclick="switchLbTab('individual', this)" data-i18n="individual">Individual</button>
-                        <button class="lb-tab" onclick="switchLbTab('groups', this)" data-i18n="campus_groups">Campus Groups</button>
                         <button class="lb-tab" onclick="switchLbTab('ngo', this)" data-i18n="ngo_csr">NGO/CSR</button>
                     </div>
                 </div>
@@ -138,12 +137,7 @@
                     </div>
                 </div>
 
-                <!-- Groups Tab -->
-                <div id="tab-groups" style="display:none">
-                    <div class="leaderboard-list" id="groupLeaderboardList">
-                        <div class="lb-loading" data-i18n="loading_groups">Loading group rankings...</div>
-                    </div>
-                </div>
+
 
                 <!-- NGO Tab -->
                 <div id="tab-ngo" style="display:none">

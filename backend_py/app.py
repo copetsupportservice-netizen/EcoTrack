@@ -904,7 +904,26 @@ def get_leaderboard():
 
     # Group analytics (Campus/Department)
     group_scores = {}
+    registered_ngos = [] # Track NGOs for separate listing
+    
     for u in raw_users:
+        # Determine effective role and account type
+        role = str(u.get('role', 'user')).lower()
+        acc_type = str(u.get('accountType', 'user')).lower()
+        
+        # Skip NGOs and Admins in group calculations
+        if role in ['ngo', 'partner'] or acc_type in ['ngo', 'partner']:
+            if u.get('group') and u.get('group') != 'Unassigned':
+                registered_ngos.append({
+                    "name": u.get('group'),
+                    "score": u.get('ecoScore', 0),
+                    "email": u.get('email')
+                })
+            continue
+            
+        if role == 'admin' or acc_type == 'admin':
+            continue
+            
         g = u.get('group', 'Unassigned')
         if g not in group_scores: group_scores[g] = []
         group_scores[g].append(u.get('ecoScore', 0))
@@ -923,6 +942,7 @@ def get_leaderboard():
         "success": True, 
         "leaderboard": lb,
         "groups": group_lb,
+        "registeredNGOs": registered_ngos,
         "myRank": next((i+1 for i, u in enumerate(sorted_users) if str(u.get('_id')) == str(request.user.get('_id'))), None)
     })
 
